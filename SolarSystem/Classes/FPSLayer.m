@@ -175,12 +175,6 @@ float mp = 45.f;
     //float x = oldVector.x-mx;
     CC3Vector newVector = [self calculateNewLeftRightPoint:-mx];
     
-    /*CC3Vector relativeToRotate = cc3v(x,0.f,0.f);
-    CC3Vector rotation = [self getCurrentCameraRotation];
-    CC3Vector relativeRotated = CC3VectorAdd(relativeToRotate, rotation);
-    CC3Vector final = CC3VectorAdd(oldVector, relativeRotated);
-    //CC3Vector rotatedVector = [self getRotatedVector:newVector];*/
-    //CC3Vector right =
     [self moveCamera:newVector];
 }
 
@@ -189,11 +183,6 @@ float mp = 45.f;
     CC3Vector oldVector =  [self getCurrentCameraLocation];
     //float x = oldVector.x+mx;
     CC3Vector newVector = [self calculateNewLeftRightPoint:mx];
-    /*CC3Vector relativeToRotate = cc3v(x,0.f,0.f);
-    CC3Vector rotation = [self getCurrentCameraRotation];
-    CC3Vector relativeRotated = CC3VectorAdd(relativeToRotate, rotation);
-    CC3Vector final = CC3VectorAdd(oldVector, relativeRotated);
-    //CC3Vector rotatedVector = [self getRotatedVector:newVector];*/
     //CC3Vector right =
     [self moveCamera:newVector];
     /*

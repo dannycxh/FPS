@@ -169,34 +169,6 @@ CC3Vector rub;*/
 	[super dealloc];
 }
 
-/*- (id)init {
-    if ((self=[super init])) {
-        CGSize winSize = [[CCDirector sharedDirector] winSize];
-        
-        // Create a label for display purposes
-        _label = [[CCLabelTTF labelWithString:@"Last button: None"
-                                   dimensions:CGSizeMake(320, 50) alignment:UITextAlignmentCenter
-                                     fontName:@"Arial" fontSize:32.0] retain];
-        _label.position = ccp(winSize.width/2,
-                              winSize.height-(_label.contentSize.height/2));
-        CCNode *node = (CCNode *)_label;
-        [self addChild:_label];
-        
-        // Standard method to create a button
-        CCMenuItem *starMenuItem = [CCMenuItemImage
-                                    itemFromNormalImage:@"ButtonStar.png" selectedImage:@"ButtonStarSel.png"
-                                    target:self selector:@selector(starButtonTapped:)];
-        starMenuItem.position = ccp(60, 60);
-        CCMenu *starMenu = [CCMenu menuWithItems:starMenuItem, nil];
-        starMenu.position = CGPointZero;
-        [self addChild:(CC3Node *)starMenu];
-    }
-    return self;
-}
-
-- (void)starButtonTapped:(id)sender {
-    [_label setString:@"Last button: *"];
-}*/
 
 /**
  * Constructs the 3D scene.
@@ -214,77 +186,7 @@ CC3Vector rub;*/
  */
 -(void) initializeScene {
 
-	/*// Create the camera, place it back a bit, and add it to the scene
-	CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
-	cam.location = cc3v( 0.0, 0.0, 6.0 );
-	[self addChild: cam];
 
-	// Create a light, place it back and to the left at a specific
-	// position (not just directional lighting), and add it to the scene
-	CC3Light* lamp = [CC3Light nodeWithName: @"Lamp"];
-	lamp.location = cc3v( -2.0, 0.0, 0.0 );
-	lamp.isDirectionalOnly = NO;
-	[cam addChild: lamp];
-
-	// This is the simplest way to load a POD resource file and add the
-	// nodes to the CC3Scene, if no customized resource subclass is needed.
-	[self addContentFromPODFile: @"hello-world.pod"];
-	
-	// Create OpenGL ES buffers for the vertex arrays to keep things fast and efficient,
-	// and to save memory, release the vertex data in main memory because it is now redundant.
-	[self createGLBuffers];
-	[self releaseRedundantData];
-	
-	// That's it! The scene is now constructed and is good to go.
-	
-	// If you encounter problems displaying your models, you can uncomment one or more of the
-	// following lines to help you troubleshoot. You can also use these features on a single node,
-	// or a structure of nodes. See the CC3Node notes for more explanation of these properties.
-	// Also, the onOpen method below contains additional troubleshooting code you can comment
-	// out to move the camera so that it will display the entire scene automatically.
-	
-	// Displays short descriptive text for each node (including class, node name & tag).
-	// The text is displayed centered on the pivot point (origin) of the node.
-//	self.shouldDrawAllDescriptors = YES;
-	
-	// Displays bounding boxes around those nodes with local content (eg- meshes).
-//	self.shouldDrawAllLocalContentWireframeBoxes = YES;
-	
-	// Displays bounding boxes around all nodes. The bounding box for each node
-	// will encompass its child nodes.
-//	self.shouldDrawAllWireframeBoxes = YES;
-	
-	// If you encounter issues creating and adding nodes, or loading models from
-	// files, the following line is used to log the full structure of the scene.
-	LogCleanDebug(@"The structure of this scene is: %@", [self structureDescription]);
-	
-	// ------------------------------------------
-
-	// But to add some dynamism, we'll animate the 'hello, world' message
-	// using a couple of cocos2d actions...
-	
-	// Fetch the 'hello, world' 3D text object that was loaded from the
-	// POD file and start it rotating
-	CC3MeshNode* helloTxt = (CC3MeshNode*)[self getNodeNamed: @"Hello"];
-	CCActionInterval* partialRot = [CC3RotateBy actionWithDuration: 1.0
-														  rotateBy: cc3v(0.0, 30.0, 0.0)];
-	[helloTxt runAction: [CCRepeatForever actionWithAction: partialRot]];
-	
-	// To make things a bit more appealing, set up a repeating up/down cycle to
-	// change the color of the text from the original red to blue, and back again.
-	GLfloat tintTime = 8.0f;
-	ccColor3B startColor = helloTxt.color;
-	ccColor3B endColor = { 50, 0, 200 };
-	CCActionInterval* tintDown = [CCTintTo actionWithDuration: tintTime
-														  red: endColor.r
-														green: endColor.g
-														 blue: endColor.b];
-	CCActionInterval* tintUp = [CCTintTo actionWithDuration: tintTime
-														red: startColor.r
-													  green: startColor.g
-													   blue: startColor.b];
-	 CCActionInterval* tintCycle = [CCSequence actionOne: tintDown two: tintUp];
-	[helloTxt runAction: [CCRepeatForever actionWithAction: tintCycle]];*/
     
     
     
@@ -343,7 +245,7 @@ CC3Vector rub;*/
     aboveCam.farClippingDistance = kCC3DefaultFarClippingDistance*4.f;
 
     [self addChild:aboveCam];
-    /*
+    
     for (int i=0;i<3;i++) {
         [self addRoomsToWalls:_walls];
     }
@@ -356,6 +258,7 @@ CC3Vector rub;*/
         [recentWalls removeAllObjects];
     }
     
+    CC3Vector northPoint = cc3v(0.f,0.f,1000.f);
     
     for (int k=0;k<5;k++) {
         [self addRoomToWall:[self wallClosestToPoint:northPoint]];
@@ -396,30 +299,9 @@ CC3Vector rub;*/
     mx = eastWall.boundingBox.maximum;
     
     [self addStaircaseWithLower:lN andUpper:cc3v(mx.x+10.f, mx.y+10.f, mx.z+10.f)];
-*/
+
     
-   /* // Add room to north
-    CC3MeshNode *northWall = [self wallClosestToPoint:northPoint];
-    lN = northWall.boundingBox.minimum;
-    mx = northWall.boundingBox.maximum;
-    lN = CC3VectorAdd(lN, cc3v(2.f, 2.f, 2.f));
-    mx = CC3VectorAdd(mx, cc3v(2.f, 2.f, 2.f));
-    //CC3Vector nMn = cc3v(lN.x,)
-    CC3Vector llf ,rlf ,luf ,ruf ,llb ,rlb ,lub , rub;
-    llf = cc3v(lN.x,lN.y,lN.z);
-    rlf = cc3v(mx.x, lN.y, lN.z);
-    luf = cc3v(lN.x,mx.y,lN.z);
-    ruf = cc3v(mx.x, mx.y, lN.z);
-    llb = cc3v(lN.x,lN.y, mx.z+5.f);
-    rlb = cc3v(mx.x,lN.y,mx.z+5.f);
-    lub = cc3v(lN.x,mx.y,mx.z+5.f);
-    rub = cc3v(mx.x,mx.y,mx.z+5.f);
-    SlopedRoom *sloped = [SlopedRoom roomWithLLF:llf andRLF:rlf andLUF:luf andRUF:ruf andLLB:llb andRLB:rlb andLUB:lub andRUB:rub];
-    [_rooms addObject:sloped];
-    [self logRoom:sloped];
-    //[self addWallsFromStandardRoom:sloped];
-    [self addRotatedWallsFromStandardRoom:sloped rotation:cc3v(-3.f,-3.f,-3.f)];*/
-    CC3Vector northPoint = cc3v(0.f,0.f,1000.f);
+    // Add room to north
     CC3MeshNode *northWall = [self wallClosestToPoint:northPoint];
     CC3Vector min = northWall.boundingBox.minimum;
     CC3Vector max = northWall.boundingBox.maximum;
