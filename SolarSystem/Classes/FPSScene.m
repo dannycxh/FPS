@@ -72,6 +72,86 @@
 
 @end
 
+@implementation Wall
+
+
++ (Wall *) wallWithLowerBounds:(CC3Vector)lower andUpper:(CC3Vector)upper {
+    Wall *wall = [[Wall alloc] init];
+    [wall setLowerBounds:lower];
+    [wall setUpperBounds:upper];
+    return wall;
+}
+
+
+@end
+
+@interface Staircase ()
+
+@property (nonatomic) NSArray *stairs;
+
+@end
+
+@implementation Staircase
+
+
+// Lower is bottom of staircase
++ (Staircase *) staircaseWithLowerBounds:(CC3Vector)lower andUpper:(CC3Vector)upper upperIsTopOfStaircase:(bool)upperIsTop {
+    Staircase *staircase = [[Staircase alloc] init];
+    [staircase setUpperBounds:upper];
+    [staircase setLowerBounds:lower];
+    
+    float stepsX = upper.x - lower.x;
+    float stepsY = upper.y - lower.y;
+    float stepsZ = upper.z - lower.z;
+    
+    float steps = 10.f;
+    
+    float eachStepX = stepsX/steps;
+    float eachStepY = stepsY/steps;
+    float eachStepZ = stepsZ/steps;
+    
+    CC3Vector v1 = cc3v(lower.x,lower.y,lower.z);
+    CC3Vector v2 = cc3v(lower.x+eachStepX, lower.y+eachStepY, upper.z);
+    
+    NSMutableArray *stairsM = [NSMutableArray array];
+    [stairsM addObject:[Wall wallWithLowerBounds:v1 andUpper:v2]];
+    
+    for (int i=1;i<steps;i++) {
+        v1 = cc3v(v2.x, v2.y, lower.z);
+        v2 = cc3v(v1.x+eachStepX, v1.y+eachStepY, upper.z);
+        
+        [stairsM addObject:[Wall wallWithLowerBounds:v1 andUpper:v2]];
+    }
+    
+    [staircase setStairs:[stairsM copy]];
+    
+    return staircase;
+}
+
+
+@end
+
+@implementation SlopedRoom
+
++ (SlopedRoom *) roomWithLLF:(CC3Vector)llf andRLF:(CC3Vector)rlf andLUF:(CC3Vector)luf andRUF:(CC3Vector)ruf andLLB:(CC3Vector)llb andRLB:(CC3Vector)rlb andLUB:(CC3Vector)lub  andRUB:(CC3Vector)rub {
+    SlopedRoom *room = [[SlopedRoom alloc] init];
+    
+    [room setLowerBounds:llf];
+    [room setUpperBounds:rub];
+    [room setLlb:llb];
+    [room setLlf:llf];
+    [room setLub:lub];
+    [room setLuf:luf];
+    [room setRlb:rlb];
+    [room setRlf:rlf];
+    [room setRub:rub];
+    [room setRuf:ruf];
+    
+    return room;
+}
+
+
+@end
 
 @implementation FPSScene
 
@@ -241,7 +321,7 @@ CC3Vector rub;*/
     [_rooms addObject:roomq];
     
     _walls = [NSMutableArray array];
-    [self addWalls:roomq];
+    [self addWallsFromStandardRoom:roomq];
     
     // Create the camera
     CC3Camera* cam = [CC3Camera nodeWithName: @"Camera"];
@@ -263,7 +343,7 @@ CC3Vector rub;*/
     aboveCam.farClippingDistance = kCC3DefaultFarClippingDistance*4.f;
 
     [self addChild:aboveCam];
-    
+    /*
     for (int i=0;i<3;i++) {
         [self addRoomsToWalls:_walls];
     }
@@ -276,7 +356,7 @@ CC3Vector rub;*/
         [recentWalls removeAllObjects];
     }
     
-    CC3Vector northPoint = cc3v(0.f,0.f,1000.f);
+    
     for (int k=0;k<5;k++) {
         [self addRoomToWall:[self wallClosestToPoint:northPoint]];
         //[self addRoomsToWalls:recentWalls];
@@ -304,9 +384,71 @@ CC3Vector rub;*/
         //[recentWalls removeAllObjects];
         
     }
+    
+    // Add staircase to west
+    CC3MeshNode *westWall = [self wallClosestToPoint:westPoint];
+    CC3Vector lN = westWall.boundingBox.minimum;
+    CC3Vector mx = westWall.boundingBox.maximum;
+    [self addStaircaseWithLower:cc3v(lN.x-10.f, lN.y-10.f, lN.z-10.f) andUpper:mx];
+    // east
+    CC3MeshNode *eastWall = [self wallClosestToPoint:eastPoint];
+    lN = eastWall.boundingBox.minimum;
+    mx = eastWall.boundingBox.maximum;
+    
+    [self addStaircaseWithLower:lN andUpper:cc3v(mx.x+10.f, mx.y+10.f, mx.z+10.f)];
+*/
+    
+   /* // Add room to north
+    CC3MeshNode *northWall = [self wallClosestToPoint:northPoint];
+    lN = northWall.boundingBox.minimum;
+    mx = northWall.boundingBox.maximum;
+    lN = CC3VectorAdd(lN, cc3v(2.f, 2.f, 2.f));
+    mx = CC3VectorAdd(mx, cc3v(2.f, 2.f, 2.f));
+    //CC3Vector nMn = cc3v(lN.x,)
+    CC3Vector llf ,rlf ,luf ,ruf ,llb ,rlb ,lub , rub;
+    llf = cc3v(lN.x,lN.y,lN.z);
+    rlf = cc3v(mx.x, lN.y, lN.z);
+    luf = cc3v(lN.x,mx.y,lN.z);
+    ruf = cc3v(mx.x, mx.y, lN.z);
+    llb = cc3v(lN.x,lN.y, mx.z+5.f);
+    rlb = cc3v(mx.x,lN.y,mx.z+5.f);
+    lub = cc3v(lN.x,mx.y,mx.z+5.f);
+    rub = cc3v(mx.x,mx.y,mx.z+5.f);
+    SlopedRoom *sloped = [SlopedRoom roomWithLLF:llf andRLF:rlf andLUF:luf andRUF:ruf andLLB:llb andRLB:rlb andLUB:lub andRUB:rub];
+    [_rooms addObject:sloped];
+    [self logRoom:sloped];
+    //[self addWallsFromStandardRoom:sloped];
+    [self addRotatedWallsFromStandardRoom:sloped rotation:cc3v(-3.f,-3.f,-3.f)];*/
+    CC3Vector northPoint = cc3v(0.f,0.f,1000.f);
+    CC3MeshNode *northWall = [self wallClosestToPoint:northPoint];
+    CC3Vector min = northWall.boundingBox.minimum;
+    CC3Vector max = northWall.boundingBox.maximum;
+    CC3Vector min1 = CC3VectorAdd(min,  cc3v(4.0,3.0,12.0));
+    CC3Vector max1 = CC3VectorAdd(max, cc3v(4.0,3.0,12.0));
+    CC3MeshNode *newNorthWall = [self addWallWithName:@"North" startPosition:min1 endPosition:max1 withTex:@"moonmap1k.jpg"];
+    CC3Vector third = cc3v(max.x, min.y, min.z);
+    CC3Vector fourth = cc3v(max1.x, min1.y, min1.z);
+    //CC3MeshNode *matchingWall = [self addRotatedWallBetweenFourVectors:min second:min1 third:third fourth:fourth];
+    CC3MeshNode *matchingWall = [self addRotatedWallBetweenTwoVectors:min max:min1];
+
+    
     [self makeWallsInvisibleWhereAdjoiningRoomsExist];
 }
 
+- (void)logVector:(CC3Vector)vector {
+    NSLog(@"Vector: %f,%f,%f", vector.x, vector.y, vector.z);
+}
+
+- (void)logRoom:(Room *)room {
+    [self logVector:room.llf];
+    [self logVector:room.rlf];
+    [self logVector:room.luf];
+    [self logVector:room.ruf];
+    [self logVector:room.llb];
+    [self logVector:room.rlb];
+    [self logVector:room.lub];
+    [self logVector:room.rub];
+}
 
 - (CC3MeshNode *)wallClosestToPoint:(CC3Vector)point {
     //float x=300.f, y=300.f, z=300.f;
@@ -326,6 +468,14 @@ CC3Vector rub;*/
         }
     }
     return closestWall;
+}
+
+- (void)addStaircaseWithLower:(CC3Vector)lower andUpper:(CC3Vector)upper {
+    Staircase *staircase = [Staircase staircaseWithLowerBounds:lower andUpper:upper upperIsTopOfStaircase:TRUE];
+    static int i = 0;
+    [_rooms addObject:staircase];
+    [self addWalls:staircase.stairs name:[NSString stringWithFormat:@"Staircase%d",i]];
+    [self addWallsFromStandardRoom:staircase];
 }
 
 - (void)addRoomToWall:(CC3MeshNode *)wall {
@@ -366,10 +516,7 @@ CC3Vector rub;*/
         }
         if (lowerIsUsable || upperIsUsable) {
             [eachWall setVisible:FALSE];
-            Room *room = [Room roomWithPoints:finalMinV.x x1:finalMaxV.x y0:finalMinV.y y1:finalMaxV.y z0:finalMinV.z z1:finalMaxV.z];
-            [_rooms addObject:room];
-            [self addWalls:room];
-
+            [self addRoomWithLower:finalMinV andUpper:finalMaxV];
         }
         
     }
@@ -378,6 +525,12 @@ CC3Vector rub;*/
 
 }
 
+- (void)addRoomWithLower:(CC3Vector)lower andUpper:(CC3Vector)upper {
+    Room *room = [Room roomWithPoints:lower.x x1:upper.x y0:lower.y y1:upper.y z0:lower.z z1:upper.z];
+    [_rooms addObject:room];
+    [self addWallsFromStandardRoom:room];
+    
+}
 - (bool)canBuildRoomBelowWall:(CC3MeshNode *)wall ofSize:(float)size {
     CC3Vector min = wall.localContentBoundingBox.minimum;
     CC3Vector max = wall.localContentBoundingBox.maximum;
@@ -758,7 +911,15 @@ CC3Vector rub;*/
         return closestWall;
 }
 
-- (void)addWalls:(Room *)room {
+- (void)addWalls:(NSArray *)walls name:(NSString *)wallsName {
+    int i=0;
+    for (Wall *eachWall in walls) {
+        [_walls addObject:[self addWallWithName:[NSString stringWithFormat:@"%@%d", wallsName, i] startPosition:eachWall.lowerBounds endPosition:eachWall.upperBounds withTex:@"mercurymap.jpg"]];
+        i++;
+    }
+}
+
+- (void)addWallsFromStandardRoom:(Room *)room {
     NSString *n = [NSString stringWithFormat:@"%d", [_walls count]];
     [_walls addObject:[self addWallWithName:[NSString stringWithFormat:@"LeftWall%@",n] startPosition:room.llf endPosition:room.lub withTex:@"mercurymap.jpg"]];
     [_walls addObject:[self addWallWithName:[NSString stringWithFormat:@"FrontWall%@",n] startPosition:room.llf endPosition:room.ruf withTex:@"moonmap1k.jpg"]];
@@ -766,6 +927,16 @@ CC3Vector rub;*/
     [_walls addObject:[self addWallWithName:[NSString stringWithFormat:@"Ceiling%@",n] startPosition:room.luf endPosition:room.rub withTex:@"sunmap.jpg"]];
     [_walls addObject:[self addWallWithName:[NSString stringWithFormat:@"RightWall%@",n] startPosition:room.rlf endPosition:room.rub withTex:@"mercurymap.jpg"]];
     [_walls addObject:[self addWallWithName:[NSString stringWithFormat:@"BackWall%@",n] startPosition:room.llb endPosition:room.rub withTex:@"moonmap1k.jpg"]];
+}
+
+- (void)addRotatedWallsFromStandardRoom:(Room *)room rotation:(CC3Vector)rotation {
+    NSString *n = [NSString stringWithFormat:@"%d", [_walls count]];
+    [_walls addObject:[self addRotatedWallWithName:[NSString stringWithFormat:@"LeftWall%@",n] startPosition:room.llf endPosition:room.lub withTex:@"sunmap.jpg" rotation:rotation]];
+    [_walls addObject:[self addRotatedWallWithName:[NSString stringWithFormat:@"FrontWall%@",n] startPosition:room.llf endPosition:room.ruf withTex:@"sunmap.jpg" rotation:rotation]];
+    [_walls addObject:[self addRotatedWallWithName:[NSString stringWithFormat:@"Floor%@",n] startPosition:room.llf endPosition:room.rlb withTex:@"sunmap.jpg" rotation:rotation]];
+    [_walls addObject:[self addRotatedWallWithName:[NSString stringWithFormat:@"Ceiling%@",n] startPosition:room.luf endPosition:room.rub withTex:@"sunmap.jpg" rotation:rotation]];
+    [_walls addObject:[self addRotatedWallWithName:[NSString stringWithFormat:@"RightWall%@",n] startPosition:room.rlf endPosition:room.rub withTex:@"sunmap.jpg" rotation:rotation]];
+    [_walls addObject:[self addRotatedWallWithName:[NSString stringWithFormat:@"BackWall%@",n] startPosition:room.llb endPosition:room.rub withTex:@"moonmap1k.jpg" rotation:rotation]];
 }
 
 
@@ -928,34 +1099,69 @@ CC3Vector rub;*/
     return planet;
 }
 
-- (CC3MeshNode*) addWallWithName: (NSString*) wallName startPosition: (CC3Vector) start endPosition: (CC3Vector) end withTex:(NSString*) tex {
-    return [self addWallWithName:wallName startPosition:start endPosition:end withTex:tex isVisible:TRUE];
+- (CC3MeshNode*) addWallWithName: (NSString*) wallName topLeftPosition: (CC3Vector) topLeft topRightPosition: (CC3Vector) topRight bottomLeftPosition: (CC3Vector) bottomLeft bottomRightPosition: (CC3Vector) bottomRight withTex:(NSString*) tex isVisible:(bool)isVisible {
+    
+
 }
 
-- (CC3MeshNode*) addWallWithName: (NSString*) wallName startPosition: (CC3Vector) start endPosition: (CC3Vector) end withTex:(NSString*) tex isVisible:(bool)isVisible {
-    
+- (CC3MeshNode*) addRotatedWallWithName: (NSString*) wallName startPosition: (CC3Vector) start endPosition: (CC3Vector) end withTex:(NSString*) tex rotation:(CC3Vector)rotation {
+    return [self addRotatedWallWithName: (NSString*) wallName startPosition: (CC3Vector) start endPosition: (CC3Vector) end withTex:(NSString*) tex isVisible:(bool)TRUE rotation:rotation];
+
+}
+
+
+- (CC3MeshNode*) addRotatedWallWithName: (NSString*) wallName startPosition: (CC3Vector) start endPosition: (CC3Vector) end withTex:(NSString*) tex isVisible:(bool)isVisible rotation:(CC3Vector)rotation {
+
     //float max = s;
     
     // Depending on wall type adjust so that walls have thickness but still are within boundaries
     if ([wallName hasPrefix:@"Ceiling"]) {
         start = cc3v(start.x,start.y-0.1f,start.z);
+        
     }
     else if ([wallName hasPrefix:@"Floor"]) {
         end = cc3v(end.x,end.y+0.1f,end.z);
     }
-    if ([wallName hasPrefix:@"RightWall"]) {
+    else if ([wallName hasPrefix:@"RightWall"]) {
         start = cc3v(start.x-0.1f,start.y,start.z);
     }
     else if ([wallName hasPrefix:@"LeftWall"]) {
         end = cc3v(end.x+0.1f,end.y,end.z);
     }
-    if ([wallName hasPrefix:@"BackWall"]) {
+    else if ([wallName hasPrefix:@"BackWall"]) {
         start = cc3v(start.x,start.y,start.z-0.1f);
     }
     else if ([wallName hasPrefix:@"FrontWall"]) {
         end = cc3v(end.x,end.y,end.z+0.1f);
     }
-
+    else {
+        // Inner wall within a room, rather than on outside
+        if (end.x-start.x < 0.1f) {
+            if ([self roomExistsBetweenLower:start andUpper:cc3v(start.x+0.1f,end.y,end.z)]) {
+                end = cc3v(end.x+0.1f, end.y, end.z);
+            }
+            else {
+                start = cc3v(start.x-0.1f, start.y, start.z);
+            }
+        }
+        if (end.y-start.y < 0.1f) {
+            if ([self roomExistsBetweenLower:start andUpper:cc3v(start.x+0.1f,end.y,end.z)]) {
+                end = cc3v(end.x, end.y+0.1f, end.z);
+            }
+            else {
+                start = cc3v(start.x, start.y-0.1f, start.z);
+            }
+        }
+        if (end.x-start.x < 0.1f) {
+            if ([self roomExistsBetweenLower:start andUpper:cc3v(start.x+0.1f,end.y,end.z)]) {
+                end = cc3v(end.x, end.y, end.z+0.1f);
+            }
+            else {
+                start = cc3v(start.x, start.y, start.z-0.1f);
+            }
+        }
+    }
+    
     
     CC3BoxNode *brickWall = [[CC3BoxNode nodeWithName:tex] copyWithName:wallName];
     //brickWall = [DoorMeshNode nodeWithName: kBrickWallName];
@@ -976,14 +1182,81 @@ CC3Vector rub;*/
     brickWall.visible = isVisible;
 	brickWall.location = start;
 	//brickWall.rotation = cc3v(0, -45, 0);
-	brickWall.rotation = cc3v(0, 0, 0);
+	brickWall.rotation = rotation;
+    if ([wallName hasPrefix:@"Floor"]) {
+        //brickWall.rotation = cc3v(0,0,0);
+        //brickWall.targetLocation = cc3v(-30.0,-30.0,-30.0);
+        //brickWall.shouldTrackTarget = YES;
+    }
 	//[self addChild: brickWall];
     
     CC3Node *orbitCentre = [CC3Node node]; //centre of solar system to rotate around
+//wall
+    //[brickWall setRotationAxis:end];
+    //[brickWall setRotationAngle:50.f];
+    CC3Rotator *rotatoooor = brickWall.rotator;
+    CC3Vector ro = rotatoooor.rotation;
+    float roA = rotatoooor.rotationAngle;
+    CC3Vector axis = rotatoooor.rotationAxis;
+    if (!CC3VectorIsZero(rotation)) {
+        [orbitCentre setLocation:CC3VectorAverage(start, end)]; // rotate around middle of
+        //[orbitCentre setLocation:cc3v(0.0,0.0,0.0)];
+        brickWall.location = CC3VectorDifference(CC3VectorAverage(start, end), start);
+        NSLog(@"");
+    }
+
     [self addChild:orbitCentre];             //add this to 3d world
     [orbitCentre addChild:brickWall];
     return brickWall;
 
+    
+}
+
+- (CC3MeshNode *) addRotatedWallBetweenTwoVectors: (CC3Vector)min max:(CC3Vector)max {
+    // Assume this is a floor or ceiling
+    double zdiff = max.z-min.z;
+    double xdiff = max.x-min.x;
+    double an1 = (atan2(zdiff, xdiff) * (180.0 / M_PI))/4.0;
+    CC3Vector avg = CC3VectorAverage(min, max);
+    CC3Vector v1 = cc3v(min.x,min.y-0.1,min.z); // was avg.y
+    CC3Vector v2 = cc3v(max.x,min.y,max.z); // was avg.y
+    //double an2 = atan2(v1.z-v1.x, first1.z-first1.x) * (180 / M_PI);
+    CC3Vector rotation = cc3v(-an1,0.0,0.0);
+    //rotation = cc3v(rotation.x*3.0,rotation.y*3.0,rotation.z*3.0);
+    //rotation = cc3v(135,23,47);
+    CC3MeshNode *toReturn = [self addRotatedWallWithName:@"thidswall" startPosition:v1 endPosition:v2 withTex:@"moonmap1k.jpg" isVisible:TRUE rotation:rotation];
+    CC3MeshNode *base = [self addRotatedWallWithName:@"thidswall" startPosition:v1 endPosition:v2 withTex:@"moonmap1k.jpg" isVisible:TRUE rotation:cc3v(0.0,0.0,0.0)];
+    return toReturn;
+    
+}
+
+- (CC3MeshNode *) addRotatedWallBetweenFourVectors: (CC3Vector)first1 second:(CC3Vector)first2 third:(CC3Vector)second1 fourth:(CC3Vector)second2 {
+    // Create a wall between two walls and rotate
+    // Avg of first1, second1
+    // Need to change this to angle
+    // DON'T USE
+    CC3Vector v1 = CC3VectorAverage(first1, second1);
+    CC3Vector v2 = CC3VectorAverage(first2, second2);
+    CC3Vector v3 = CC3VectorAverage(first1, first2);
+    CC3Vector v4 = CC3VectorAverage(second1, second2);
+    CC3Vector diff = CC3VectorDifference(first1, v1);
+    [self logVector:v1];
+    [self logVector:v2];
+    double an1 = atan2(second1.z-second1.x, first1.z-first1.x) * (180 / M_PI);
+    double an2 = atan2(v1.z-v1.x, first1.z-first1.x) * (180 / M_PI);
+    CC3Vector rotation = cc3v(-an2,0.0,0.0);
+    //rotation = cc3v(rotation.x*3.0,rotation.y*3.0,rotation.z*3.0);
+    //rotation = cc3v(135,23,47);
+    CC3MeshNode *toReturn = [self addRotatedWallWithName:@"thidswall" startPosition:v1 endPosition:v2 withTex:@"moonmap1k.jpg" isVisible:TRUE rotation:rotation];
+    return toReturn;
+}
+
+- (CC3MeshNode*) addWallWithName: (NSString*) wallName startPosition: (CC3Vector) start endPosition: (CC3Vector) end withTex:(NSString*) tex {
+    return [self addWallWithName:wallName startPosition:start endPosition:end withTex:tex isVisible:TRUE];
+}
+
+- (CC3MeshNode*) addWallWithName: (NSString*) wallName startPosition: (CC3Vector) start endPosition: (CC3Vector) end withTex:(NSString*) tex isVisible:(bool)isVisible {
+    return [self addRotatedWallWithName: (NSString*) wallName startPosition: (CC3Vector) start endPosition: (CC3Vector) end withTex:(NSString*) tex isVisible:(bool)isVisible rotation:cc3v(0.f,0.f,0.f)];
     
 }
 
@@ -1063,7 +1336,7 @@ CC3Vector rub;*/
     CC3Camera *cam = self.activeCamera;
     // Get rotation and take angle into account
 
-    id moveCam = [CC3MoveTo actionWithDuration:1.f moveTo:toVector];
+    id moveCam = [CC3MoveTo actionWithDuration:0.5f moveTo:toVector];
     [cam runAction:moveCam];
 }
 

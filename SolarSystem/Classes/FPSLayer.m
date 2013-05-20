@@ -12,7 +12,7 @@
 
 @implementation FPSLayer
 
-float mx = 90.f;
+float mx = 180.f;
 float mp = 45.f;
 
 - (void)dealloc {

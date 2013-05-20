@@ -26,6 +26,30 @@
 + (Room *) roomWithLowerBounds:(CC3Vector)lower andUpper:(CC3Vector)upper;
 @end
 
+@interface Wall  : NSObject
+
+@property (nonatomic) CC3Vector lowerBounds;
+@property (nonatomic) CC3Vector upperBounds;
+
++ (Wall *) wallWithLowerBounds:(CC3Vector)lower andUpper:(CC3Vector)upper;
+
+@end
+
+@interface Staircase : Room
+
+@property (nonatomic, readonly) NSArray *stairs;
+
++ (Staircase *) staircaseWithLowerBounds:(CC3Vector)lower andUpper:(CC3Vector)upper upperIsTopOfStaircase:(bool)upperIsTop;
+
+
+@end
+
+@interface SlopedRoom : Room
++ (SlopedRoom *) roomWithLLF:(CC3Vector)llf andRLF:(CC3Vector)rlf andLUF:(CC3Vector)luf andRUF:(CC3Vector)ruf andLLB:(CC3Vector)llb andRLB:(CC3Vector)rlb andLUB:(CC3Vector)lub  andRUB:(CC3Vector)rub;
+
+
+@end
+
 /** A sample application-specific CC3Scene subclass.*/
 @interface FPSScene : CC3Scene
     {
